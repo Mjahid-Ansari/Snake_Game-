@@ -1,172 +1,258 @@
-"""
-
+import pygame
 import time
-from random import randint
+import random
 
-money = int(input("Welcom you, 7thup 7thdown is adics game which is played by betting on numbers more then 7 or less then 7. \n Two dies are rolled in the game "))
-play = input("Do you want to play a game of 7th up 7th down? Y or N")
-while play.startswith('y'):
-    number = randint(1,12)
-    bet = int(input("for how much money you want to bet for? "))
-    if bet > money:
-        print("Foul! Not enough money you need extra", bet-money,"rupess to place the bet, withdraw enough money next time")
-        break
-    guess = input("Bet from the ")
-    time.sleep(1)
-    print(".....")
-    time.sleep(1)
-    print(" Dies are rolling...")
-    time.sleep(1)
-    print(".....")
-    time.sleep(1)
-    print(".....")
-    time.sleep(1)
+pygame.init()
 
-    if guess.lower().startswith('a'):
-        if number > 7:
-            print("you have guessed correctly! the number was",number)
-            money = money + bet
-            print("you have", money, "rupees.")
-            play = input(("play again? Y or N  "))
-            if money < 1:
-                print("you have run out of money, time to go to the ATM")
-                money = int(input("How much money you want to withdraw from your ATM")
-        if number < 8:
-            print("you have guessed wrong! the number was",number)
-            money = money - bet
-            print("you have",money," rupees.")
-            play = input("play again? Y or N  ")
-            if money < 1:
-                print("you have run out of money, time to go to the ATM")
-                money = int(input("How much money you want to withdraw from your ATM")
+white = (255, 255, 255)
+yellow = (255, 255, 0)
+black = (0, 0, 0)
+red = (255, 0, 0)
+green = (0, 255, 0)
+blue = (50, 153, 213)
 
-    if guess.lower().startswith('b'):
-        if number < 7:
-            print(f"you have guessed correctly! the number was")
-            money = money + bet
-            print("you have", money, "rupees.")
-            play = input(("play again? Y or N  "))
-            if money < 1:
-                print("you have run out of money, time to go to the ATM")
-                money = int(input("How much money you want to withdraw from your ATM")
+dis_width = 600
+dis_height = 600
 
-        if number > 6:
-            print("you have guessed wrong! the number was", number)
-            money = money - bet
-            print("you have", money, " rupees.")
-            play = input("play again? Y or N  ")
-            if money < 1:
-                print("you have run out of money, time to go to the ATM")
-                money = int(input("How much money you want to withdraw from your ATM")
+dis = pygame.display.set_mode((dis_width, dis_height))
+pygame.display.set_caption("Snake Game by Faisal")
 
-    if guess.lower().startswith('c'):
-        if number == 7:
-            print("you have guessed correctly! the number was", number)
-            money = money + (bet * 2)
-            print("you have", money, "rupees.")
-            play = input(("play again? Y or N  "))
-            if money < 1:
-                print("you have run out of money, time to go to the ATM")
-                money = int(input("How much money you want to withdraw from your ATM")
+clock = pygame.time.Clock()
 
-        if number != 7:
-            print("you have guessed wrong! the number was", number)
-            money = money - (bet * 2)
-            print("you have", money, " rupees.")
-            play = input("play again? Y or N  ")
-            if money < 1:
-                print("you have run out of money, time to go to the ATM")
-                money = int(input("How much money you want to withdraw from your ATM")
+snake_block = 10
+snake_speed = 15
+
+font_style = pygame.font.SysFont("bahnschrift", 25)
+score_font = pygame.font.SysFont("comicsansms", 35)
 
 
-
-print()
-print("Okey, the game is over.")
-print("you finished with", money, "rupees.")
-
+def your_score(score):
+    value = score_font.render("Your Score: " + str(score), True, yellow)
+    dis.blit(value, [0, -5])
 
 
-"""
+def our_snake(snake_block, snake_list):
+    for x in snake_list:
+        pygame.draw.rect(dis, black, [x[0], x[1], snake_block, snake_block])
 
+
+def message(msg, color):
+    mesg = font_style.render(msg, True, color)
+    dis.blit(mesg, [dis_width / 6, dis_height / 3])
+
+
+def gameLoop():
+    game_over = False
+    game_close = False
+
+    x1 = dis_width / 2
+    y1 = dis_height / 2
+
+    x1_change = 0
+    y1_change = 0
+
+    snake_List = []
+    Length_of_snake = 1
+
+    foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
+    foody = round(random.randrange(0, dis_height - snake_block) / 10.0) * 10.0
+
+    while not game_over:
+
+        while game_close:
+            dis.fill(blue)
+            message("You Lost! Press C-Play Again or Q-Quit", red)
+            your_score(Length_of_snake - 1)
+            pygame.display.update()
+
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        game_over = True
+                        game_close = False
+                    if event.key == pygame.K_c:
+                        gameLoop()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                game_over = True
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    x1_change = -snake_block
+                    y1_change = 0
+                elif event.key == pygame.K_RIGHT:
+                    x1_change = snake_block
+                    y1_change = 0
+                elif event.key == pygame.K_UP:
+                    x1_change = 0
+                    y1_change = -snake_block
+                elif event.key == pygame.K_DOWN:
+                    x1_change = 0
+                    y1_change = snake_block
+
+        if x1 >= dis_width or x1 < 0 or y1 >= dis_height or y1 < 0:
+            game_close = True
+        x1 += x1_change
+        y1 += y1_change
+        dis.fill(blue)
+
+        pygame.draw.rect(dis, green, [foodx, foody, snake_block, snake_block])
+
+        snake_Head = []
+        snake_Head.append(x1)
+        snake_Head.append(y1)
+        snake_List.append(snake_Head)
+
+        if len(snake_List) > Length_of_snake:
+            del snake_List[0]
+
+        for x in snake_List[:-1]:
+            if x == snake_Head:
+                game_close = True
+
+        our_snake(snake_block, snake_List)
+        your_score(Length_of_snake - 1)
+
+        pygame.display.update()
+
+        if x1 == foodx and y1 == foody:
+            foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
+            foody = round(random.randrange(0, dis_height - snake_block) / 10.0) * 10.0
+            Length_of_snake += 1
+
+        clock.tick(snake_speed)
+
+    pygame.quit()
+    quit()
+
+
+gameLoop()
+import pygame
 import time
-from random import randint
+import random
 
-# Start with the initial amount of money
-print("Welcome! 7thup 7thdown is a dice game where you bet on whether the sum of two dice will be higher, lower, or exactly 7.")
-play = input("Do you want to play a game of 7thup 7thdown? (Y/N): ").lower()
+pygame.init()
 
-money = int(input("How much money do you want to start with? "))
+white = (255, 255, 255)
+yellow = (255, 255, 0)
+black = (0, 0, 0)
+red = (255, 0, 0)
+green = (0, 255, 0)
+blue = (50, 153, 213)
 
-# Check if the user ran out of money
-if money < 1:
-    print("You have run out of money, time to go to the ATM.")
-    money = int(input("How much money do you want to withdraw from your ATM? "))
+dis_width = 600
+dis_height = 600
 
-# Ask if the user wants to play
+dis = pygame.display.set_mode((dis_width, dis_height))
+pygame.display.set_caption("Snake Game by Faisal")
 
-while play == 'y':
-    number = randint(2, 12)  # Dice sum should be between 2 and 12
-    bet = int(input(f"How much money do you want to bet? You have {money} rupees: "))
+clock = pygame.time.Clock()
 
-    if bet > money:
-        print(
-            f"Not enough money! You need {bet - money} more rupees to place this bet. Withdraw enough money next time.")
-        break
+snake_block = 10
+snake_speed = 15
 
-    if bet == 0:
-        print(f"You should put the bet atlest 1 rupees to this bet. put 1 or more than 1 rupees next time.")
-        bet = int(input(f"How much money do you want to bet? You have {money} rupees: "))
+font_style = pygame.font.SysFont("bahnschrift", 25)
+score_font = pygame.font.SysFont("comicsansms", 35)
 
-    # Check if the user ran out of money
-    if money < 1:
-        print("You have run out of money, time to go to the ATM.")
-        money = int(input("How much money do you want to withdraw from your ATM? "))
 
-    guess = input("Bet 'a' for more than 7, 'b' for less than 7, or 'c' for exactly 7: ").lower()
+def your_score(score):
+    value = score_font.render("Your Score: " + str(score), True, yellow)
+    dis.blit(value, [0, -5])
 
-    # Simulate the dice rolling
-    time.sleep(1)
-    print(".....")
-    time.sleep(1)
-    print("The dice are rolling...")
-    time.sleep(1)
-    print(".....")
-    time.sleep(1)
 
-    # Handle guesses
-    if guess == 'a':
-        if number > 7:
-            print(f"You guessed correctly! The number was {number}.")
-            money += bet
-        else:
-            print(f"You guessed wrong! The number was {number}.")
-            money -= bet
+def our_snake(snake_block, snake_list):
+    for x in snake_list:
+        pygame.draw.rect(dis, black, [x[0], x[1], snake_block, snake_block])
 
-    elif guess == 'b':
-        if number < 7:
-            print(f"You guessed correctly! The number was {number}.")
-            money += bet
-        else:
-            print(f"You guessed wrong! The number was {number}.")
-            money -= bet
 
-    elif guess == 'c':
-        if number == 7:
-            print(f"You guessed correctly! The number was {number}. You win double your bet!")
-            money += bet * 2
-        else:
-            print(f"You guessed wrong! The number was {number}. You lose double your bet!")
-            money -= bet * 2
-    else:
-        print("Invalid guess! Please choose 'a', 'b', or 'c'.")
+def message(msg, color):
+    mesg = font_style.render(msg, True, color)
+    dis.blit(mesg, [dis_width / 6, dis_height / 3])
 
-    # Check if the user ran out of money
-    # if money < 1:
-    #     print("You have run out of money, time to go to the ATM.")
-    #     money = int(input("How much money do you want to withdraw from your ATM? "))
 
-    # Ask if the player wants to continue playing
-    # play = input("Do you want to play again? (Y/N): ").lower()
+def gameLoop():
+    game_over = False
+    game_close = False
 
-print()
-print(f"Okay, the game is over. You finished with {money} rupees.")
+    x1 = dis_width / 2
+    y1 = dis_height / 2
+
+    x1_change = 0
+    y1_change = 0
+
+    snake_List = []
+    Length_of_snake = 1
+
+    foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
+    foody = round(random.randrange(0, dis_height - snake_block) / 10.0) * 10.0
+
+    while not game_over:
+
+        while game_close:
+            dis.fill(blue)
+            message("You Lost! Press C-Play Again or Q-Quit", red)
+            your_score(Length_of_snake - 1)
+            pygame.display.update()
+
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        game_over = True
+                        game_close = False
+                    if event.key == pygame.K_c:
+                        gameLoop()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                game_over = True
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    x1_change = -snake_block
+                    y1_change = 0
+                elif event.key == pygame.K_RIGHT:
+                    x1_change = snake_block
+                    y1_change = 0
+                elif event.key == pygame.K_UP:
+                    x1_change = 0
+                    y1_change = -snake_block
+                elif event.key == pygame.K_DOWN:
+                    x1_change = 0
+                    y1_change = snake_block
+
+        if x1 >= dis_width or x1 < 0 or y1 >= dis_height or y1 < 0:
+            game_close = True
+        x1 += x1_change
+        y1 += y1_change
+        dis.fill(blue)
+
+        pygame.draw.rect(dis, green, [foodx, foody, snake_block, snake_block])
+
+        snake_Head = []
+        snake_Head.append(x1)
+        snake_Head.append(y1)
+        snake_List.append(snake_Head)
+
+        if len(snake_List) > Length_of_snake:
+            del snake_List[0]
+
+        for x in snake_List[:-1]:
+            if x == snake_Head:
+                game_close = True
+
+        our_snake(snake_block, snake_List)
+        your_score(Length_of_snake - 1)
+
+        pygame.display.update()
+
+        if x1 == foodx and y1 == foody:
+            foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
+            foody = round(random.randrange(0, dis_height - snake_block) / 10.0) * 10.0
+            Length_of_snake += 1
+
+        clock.tick(snake_speed)
+
+    pygame.quit()
+    quit()
+
+
+gameLoop()
